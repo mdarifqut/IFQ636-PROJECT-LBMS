@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,12 +13,39 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <Link to="/" className="text-2xl font-bold">Your apps name</Link>
       <div>
+        <Link to="/" className="text-xl font-bold">
+          Library Book Management System
+        </Link>
+
+        {user && (
+          <div className="text-sm text-blue-100 mt-1">
+            <strong>
+              {user.name} [role:{user.role || 'Unknown'}]
+            </strong>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
         {user ? (
           <>
-            <Link to="/tasks" className="mr-4">CRUD</Link>
-            <Link to="/profile" className="mr-4">Profile</Link>
+            {user.role === 'Librarian' && (
+              <Link to="/books" className="hover:underline">
+                Catalogue
+              </Link>
+            )}
+
+            {user.role === 'Reader' && (
+              <Link to="/request-book" className="hover:underline">
+                Borrow
+              </Link>
+            )}
+
+            <Link to="/profile" className="hover:underline">
+              Profile
+            </Link>
+
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-2 rounded hover:bg-red-700"
@@ -27,7 +55,10 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Link to="/login" className="mr-4">Login</Link>
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+
             <Link
               to="/register"
               className="bg-green-500 px-4 py-2 rounded hover:bg-green-700"
