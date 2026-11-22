@@ -74,8 +74,13 @@ cd IFQ636-PROJECT-LBMS
 cd backend
 npm install
 ```
+### Backend Configuration
 
-Configure the backend environment variables in `.env`, including the MongoDB connection string and JWT secret. Do not commit `.env` to Git.
+Create a `.env` file inside the `backend` directory.
+
+Configure the MongoDB Atlas connection string and JWT secret required by the backend.
+
+Do not commit the `.env` file to GitHub because it contains sensitive configuration information.
 
 Start the backend:
 
