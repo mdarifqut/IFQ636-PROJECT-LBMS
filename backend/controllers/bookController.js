@@ -1,5 +1,6 @@
 
 const Book = require('../models/Book');
+const BorrowingTransaction = require('../models/BorrowingTransaction');
 
 // Escape special characters used in regular expressions.
 const escapeRegex = (value) =>
@@ -147,7 +148,36 @@ const updateBook = async (req, res) => {
       }
     }
 
-    const book = await Book.findByIdAndUpdate(
+    const book = await Book.findById(req.params.id);
+
+    if (!book) {
+      return res.status(404).json({
+        message: 'Book not found',
+      });
+    }
+
+    // Prevent manual availability changes while a borrowing
+    // request or loan is active.
+    if (
+      Object.prototype.hasOwnProperty.call(
+        updates,
+        'availabilityStatus'
+      )
+    ) {
+      const activeRequest = await BorrowingTransaction.exists({
+        bookCopyID: book.bookCopyID,
+        status: { $in: ['Pending', 'Approved'] },
+      });
+
+      if (activeRequest) {
+        return res.status(409).json({
+          message:
+            'Cannot manually change availability while a borrowing request or loan is active',
+        });
+      }
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       {
@@ -156,7 +186,7 @@ const updateBook = async (req, res) => {
       }
     );
 
-    if (!book) {
+    if (!updatedBook) {
       return res.status(404).json({
         message: 'Book not found',
       });
@@ -164,7 +194,7 @@ const updateBook = async (req, res) => {
 
     return res.status(200).json({
       message: 'Book updated successfully',
-      book,
+      book: updatedBook,
     });
   } catch (error) {
     if (
@@ -190,7 +220,7 @@ const updateBook = async (req, res) => {
 };
 
 // DELETE /api/books/:id
-// Librarian: Delete a book that is not borrowed.
+// Librarian: Delete a book with no borrowing history.
 const deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -204,6 +234,18 @@ const deleteBook = async (req, res) => {
     if (book.availabilityStatus === 'Borrowed') {
       return res.status(409).json({
         message: 'Cannot delete a borrowed book',
+      });
+    }
+
+    // Preserve borrowing history and prevent deletion
+    // while a request is pending.
+    const borrowingHistory = await BorrowingTransaction.exists({
+      bookCopyID: book.bookCopyID,
+    });
+
+    if (borrowingHistory) {
+      return res.status(409).json({
+        message: 'Cannot delete a book with borrowing history',
       });
     }
 
