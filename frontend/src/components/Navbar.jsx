@@ -31,9 +31,18 @@ const Navbar = () => {
         {user ? (
           <>
             {user.role === 'Librarian' && (
-              <Link to="/books" className="hover:underline">
-                Catalogue
-              </Link>
+              <>
+                <Link to="/books" className="hover:underline">
+                  Catalogue
+                </Link>
+
+                <Link
+                  to="/borrowing-management"
+                  className="hover:underline"
+                >
+                  Borrowing Management
+                </Link>
+              </>
             )}
 
             {user.role === 'Reader' && (
@@ -47,6 +56,7 @@ const Navbar = () => {
             </Link>
 
             <button
+              type="button"
               onClick={handleLogout}
               className="bg-red-500 px-4 py-2 rounded hover:bg-red-700"
             >
