@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import BookManagement from './pages/BookManagement';
 import RequestBook from './pages/RequestBook';
+import BorrowingManagement from './pages/BorrowingManagement';
 
 function App() {
   return (
@@ -26,6 +27,11 @@ function App() {
         <Route
           path="/request-book"
           element={<RequestBook />}
+        />
+
+        <Route
+          path="/borrowing-management"
+          element={<BorrowingManagement />}
         />
       </Routes>
     </Router>
