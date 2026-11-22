@@ -1,28 +1,45 @@
-name: CI
+
+name: LBMS CI
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+      - feature/**
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build-and-check:
+    name: Build and Check LBMS
+    runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout code
-            uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Set up Node.js
-            uses: actions/setup-node@v2
-            with:
-                node-version: '14'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-        - name: Install dependencies
-            run: npm install
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
 
-        - name: Run tests
-            run: npm test
+      - name: Check backend JavaScript syntax
+        working-directory: ./backend
+        run: |
+          find . -path './node_modules' -prune -o \
+            -name '*.js' -type f -exec node --check {} \;
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build React frontend
+        working-directory: ./frontend
+        env:
+          CI: false
+        run: npm run build
